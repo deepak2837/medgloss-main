@@ -75,53 +75,54 @@ const universityData = [
 ];
 
 export default function SearchBar() {
-    const [query, setQuery] = useState('');
-    const [searchResults, setSearchResults] = useState([]);
-    const router = useRouter();
-  
-    const handleInputChange = (event) => {
-      const userInput = event.target.value.toLowerCase();
-      setQuery(userInput);
-      const results = searchPapers(userInput);
-      setSearchResults(results);
-    };
-  
-    const searchPapers = (query) => {
-      const results = [];
-      universityData.forEach(university => {
-        university.courses.forEach(course => {
-          course.previousYearPapers.forEach(paper => {
-            if (paper.year.toString().includes(query) || paper.semester.toLowerCase().includes(query)) {
-              results.push({ universityCode: university.universityCode, courseName: course.courseName, paper });
-            }
-          });
+  const [query, setQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const router = useRouter();
+
+  const handleInputChange = (event) => {
+    const userInput = event.target.value.toLowerCase();
+    setQuery(userInput);
+    const results = searchPapers(userInput);
+    setSearchResults(results);
+  };
+
+  const searchPapers = (query) => {
+    const results = [];
+    universityData.forEach(university => {
+      university.courses.forEach(course => {
+        course.previousYearPapers.forEach(paper => {
+          if (paper.year.toString().includes(query) || paper.semester.toLowerCase().includes(query)) {
+            results.push({ universityCode: university.universityCode, courseName: course.courseName, paper });
+          }
         });
       });
-      return results;
-    };
-  
-    const handlePaperClick = (paper) => {
-      window.open(paper.pdfLink, '_blank');
-    };
-  
-    return (
-      <div>
-        <input
-          type="text"
-          placeholder="Search for a paper..."
-          value={query}
-          onChange={handleInputChange}
-        />
-        {/* Search results */}
-        {searchResults.length > 0 && (
-          <ul>
-            {searchResults.map((result, index) => (
-              <li key={index} onClick={() => handlePaperClick(result.paper)}>
-                {result.courseName} {result.paper.year} {result.paper.semester} paper
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-    );
-  }
+    });
+    return results;
+  };
+
+  const handlePaperClick = (paper) => {
+    const { universityCode, courseName } = paper;
+    router.push(`/${universityCode}/${courseName}/${paper.year}/${paper.semester}`);
+  };
+
+  return (
+    <div>
+      <input
+        type="text"
+        placeholder="Search for a paper..."
+        value={query}
+        onChange={handleInputChange}
+      />
+      {/* Search results */}
+      {searchResults.length > 0 && (
+        <ul>
+          {searchResults.map((result, index) => (
+            <li key={index} onClick={() => handlePaperClick(result.paper)}>
+              {result.courseName} {result.paper.year} {result.paper.semester} paper
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}

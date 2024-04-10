@@ -1,67 +1,73 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
-
-const universities = [
-  {
-    "id": 1,
-    "name": "Harvard Medical School",
-    "code": "HMS"
-  },
-  {
-    "id": 2,
-    "name": "Mayo Clinic College of Medicine and Science",
-    "code": ""
-  },
-  {
-    "id": 3,
-    "name": "Johns Hopkins School of Medicine",
-    "code": "JHUSOM"
-  },
-  // Add more universities here
-];
+import Autosuggest from 'react-autosuggest';
+import collegesData from './mbbs_college_list.json'; // Import the JSON data
 
 export default function SearchBar() {
   const [query, setQuery] = useState('');
-  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [suggestions, setSuggestions] = useState([]);
   const router = useRouter();
 
-  const filterUniversities = (query) => {
-    return universities.filter(university =>
-      university.name.toLowerCase().includes(query.toLowerCase()) ||
-      university.code.toLowerCase().includes(query.toLowerCase())
-    );
+  const getSuggestions = (value) => {
+    const inputValues = value.trim().toLowerCase().split(/\s+/); // Split input string into individual words
+    const inputLength = inputValues.length;
+  
+    if (inputLength === 0) {
+      return [];
+    }
+  
+    // Filter colleges that contain all or most of the input words
+    const matches = collegesData.filter(college => {
+      const collegeName = college.collegeName.toLowerCase();
+      return inputValues.every(word => collegeName.includes(word));
+    });
+  
+    return matches;
+  };
+  
+  
+  const onSuggestionsFetchRequested = ({ value }) => {
+    setSuggestions(getSuggestions(value));
   };
 
-  const handleInputChange = (event) => {
-    setQuery(event.target.value);
-    setShowSuggestions(true);
+  const onSuggestionsClearRequested = () => {
+    setSuggestions([]);
   };
 
-  const handleSearch = (selectedUniversity) => {
-    setShowSuggestions(false);
-    if (selectedUniversity) {
-      router.push(`/${selectedUniversity.code}`);
+  const handleInputChange = (event, { newValue }) => {
+    setQuery(newValue);
+  };
+
+  const handleSearch = (selectedCollege) => {
+    if (selectedCollege) {
+      const collegeNameWithDashes = selectedCollege.collegeName
+        .replace(/,/g, '') // Remove commas
+        .replace(/\s+/g, '-') // Replace spaces with dashes
+        .toLowerCase(); // Convert to lowercase
+      router.push(`/${encodeURIComponent(collegeNameWithDashes)}`);
     }
   };
 
-  return (
-    <div>
-      <input
-        type="text"
-        placeholder="Search for a university..."
-        value={query}
-        onChange={handleInputChange}
-      />
-      {/* Suggestions */}
-      {showSuggestions && query && (
-        <ul>
-          {filterUniversities(query).map(university => (
-            <li key={university.id} onClick={() => handleSearch(university)}>
-              {university.name} ({university.code})
-            </li>
-          ))}
-        </ul>
-      )}
+  const getSuggestionValue = (suggestion) => suggestion.collegeName;
+
+  const renderSuggestion = (suggestion) => (
+    <div onClick={() => handleSearch(suggestion)}>
+      {suggestion.collegeName}
     </div>
+  );
+
+  return (
+    <Autosuggest
+      suggestions={suggestions}
+      onSuggestionsFetchRequested={onSuggestionsFetchRequested}
+      onSuggestionsClearRequested={onSuggestionsClearRequested}
+      getSuggestionValue={getSuggestionValue}
+      renderSuggestion={renderSuggestion}
+      inputProps={{
+        placeholder: 'Search for a college...',
+        value: query,
+        onChange: handleInputChange
+      }}
+    />
   );
 }
