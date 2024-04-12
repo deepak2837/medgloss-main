@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 
 const universityData = [
   {
-    "universityCode": "HMS",
+    "universityCode": "all-india-institute-of-medical-sciences-new-delhi",
     "courses": [
       {
         "courseName": "Medicine",
@@ -38,7 +38,7 @@ const universityData = [
     ]
   },
   {
-    "universityCode": "JHUSOM",
+    "universityCode": "all-india-institute-of-medical-sciences-new-delhi",
     "courses": [
       {
         "courseName": "Surgery",
@@ -100,10 +100,11 @@ export default function SearchBar() {
     return results;
   };
 
-  const handlePaperClick = (paper) => {
-    const { universityCode, courseName } = paper;
+  const handlePaperClick = (result) => {
+    const { universityCode, courseName, paper } = result;
     router.push(`/${universityCode}/${courseName}/${paper.year}/${paper.semester}`);
   };
+  
 
   return (
     <div>
