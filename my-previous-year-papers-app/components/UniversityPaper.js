@@ -101,8 +101,10 @@ export default function SearchBar() {
   };
 //comment 
   const handlePaperClick = (result) => {
-    const { universityCode, courseName, paper } = result;
-    router.push(`/${universityCode}/${courseName}/${paper.year}/${paper.semester}`);
+    console.log(result)
+    // const { universityCode, courseName, paper } = result;
+    // console.log(universityCode, courseName, paper )
+    // router.push(`/${universityCode}/${courseName}/${result.year}/${result.semester}`);
   };
   
 
